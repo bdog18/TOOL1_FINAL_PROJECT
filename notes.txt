@@ -1,0 +1,80 @@
+- Data cleaning and type conversion activity. Please share anything unusual you faced during this activity.
+
+Data cleaning:
+    irrelevant columns from both datasets were dropped since they are not useful.
+
+    renamed all columns to consistent camel case names so that they are more consistent.
+    
+    filtered the row level data based on the overlap of years that occur in both datasets.
+    this meant that we ended up with a range of 50 years of data from 1970 - 2020.
+
+    renamed countries in life_df that were in terror_df, but were spelled differently for the
+    sake of consistency and ease of merging.
+
+    inner merged cleaned dataframes in order to create a full dataframe that only had countries that occurred
+    in both datasets for the sake of relevancy.
+
+Data conversion:
+    terror_df:
+        converted all row level data into text values (i.e. 0 = No, etc.) so that when crosstab
+        occurred that we were able to count occurances of text values and use these values in conjunction
+        with the column name to create new columns for each value (ex. success_No, success_Yes).
+
+    life_df:
+        the data came as a pivot table, so to be useable for our analysis, it was melted back into a
+        standard table. 
+
+Unusual:
+    in order to get the categorical columns into the format that we wanted (count values grouped by year, region, and country),
+    we had to crosstab all of the columns into individual tables and rename the columns with the schema
+    of "columnOriginalName_columnValue". This was all done in a for loop of the desired columns, appended to
+    a list and then all concatenated into a large df. This process proved to maybe be a little conveluted but
+    achieved the desired effect. The list of smaller dfs were then able to be unpacked and created into global
+    variables which are accessable by using "columnOriginalName_df". This was unusual and also isn't recognized
+    by pylance as instantiated variables but work.
+
+
+
+
+- What did you do about missing values and why? Handling missing values properly is very important.
+
+terror_df:
+    categorical variables:
+        unconditional (all columns but propertyDamageCost, ransomDemanded, and ransomAmount):
+            these columns often did not have missing values, but there were a few columns.
+            for these we filled missing values with -9 as this was the value used in the data dict
+            for "Unknown". This allowed for unique identifying of these as they are unknown, but still
+            relevant values.
+
+        conditional:
+            these columns had a lot more values that are missing since they are only filled out when
+            the value of their unconditional counterparts are equal to 1 or yes. propertyDamageCost and ransomDemanded
+            are categorical values so missing values were filled in with -99 to give a unique identifier
+            for values that are 'N/A', especially since there are still values that are -9 or "Unknown".
+            ransomAmount is continuous since it is a dollar amount so NaN values were left alone as they
+            do not effect aggregate values like sum or mean.
+
+life_df:
+    after melting of pivot table. strange entries with the value of "Unnamed: 68" were present but not 
+    relevant, so they were removed from the dataset.
+    
+    very few missing values, with all of them occurring in lifeExpectancy. Countries with more than 30% of 
+    their values missing were dropped since they are not well represented in the dataset. Those with less 
+    than 30% of their values missing were backfilled in order to give time series visualizations consistency
+    while minimizing data loss. This also helps to preserve data trends and relationships.
+
+
+
+
+- New feature/attribute creation and data summary statistics and interpretation.
+
+    terror_df data was row level so all data was grouped by year, region, and country and then aggregated
+    in order to create counts of distinct categorical values. Our only continuous variable in terror_df
+    came from the column "ransomAmount" and was used to create "ransomAmount_Sum" and "ransomAmount_Mean"
+    which give the total amount of ransom demanded and average amount demanded per grouping when applicable.
+    this is both a form of summary statistics and feature engineering since it is grouped across values and
+    uses aggregation along a timeline.
+
+    life_df did not have anything newly created.
+
+    Not sure if he wants the interpretation in the paper or in the notebook?
